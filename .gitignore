@@ -1,6 +1,7 @@
 # project specific patterns
 logs/
 tests/fixtures/**/stage1.*
+tests/fixtures/**/actual-stage2.txt
 docs/plans
 
 # Byte-compiled / optimized / DLL files

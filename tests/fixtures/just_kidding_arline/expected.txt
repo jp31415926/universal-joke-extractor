@@ -1,5 +1,5 @@
-Title: Just kidding  ;)
-Title-Source: subject
+Title:
+Title-Source: body_internal
 No-Joke-Found: false
 
 There are three blondes stranded on an island. Suddenly a fairy

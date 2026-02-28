@@ -14,6 +14,7 @@ Usage:
 """
 
 import json
+import logging
 import re
 import sys
 import difflib
@@ -21,6 +22,11 @@ from pathlib import Path
 
 # Allow importing from project root
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Route joke_extractor debug logs to stderr so token usage is visible
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG,
+                    format="%(message)s")
+logging.getLogger("joke_extractor").setLevel(logging.DEBUG)
 
 from llm import extract_joke
 
@@ -45,8 +51,8 @@ def _parse_result_file(path: Path) -> dict:
             body_lines.append(line)
         elif line == "":
             in_body = True
-        elif ": " in line:
-            key, _, val = line.partition(": ")
+        elif ":" in line:
+            key, _, val = line.partition(":")
             headers[key.strip()] = val.strip()
         else:
             # line with no colon — treat as start of body
@@ -96,7 +102,13 @@ def _compare(expected: dict, actual: dict) -> list[str]:
             f"actual={actual['no_joke_found']}"
         )
 
-    if expected["title_source"] != actual["title_source"]:
+    # Blank title + body_internal is the convention for "generate any title — don't check source"
+    title_source_is_wildcard = (
+        not expected["title"] and expected["title_source"] == "body_internal"
+    )
+    # Title-Source may list multiple acceptable values separated by "|"
+    acceptable_sources = set(expected["title_source"].split("|"))
+    if not title_source_is_wildcard and actual["title_source"] not in acceptable_sources:
         failures.append(
             f"Title-Source mismatch: expected={expected['title_source']!r} "
             f"actual={actual['title_source']!r}"

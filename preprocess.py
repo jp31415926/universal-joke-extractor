@@ -58,6 +58,9 @@ _FWD_HEADER_RE = re.compile(
 # All-caps lines (likely footers/banners), 4+ words, no lowercase
 _ALL_CAPS_LINE_RE = re.compile(r"^(?:[A-Z0-9 \t,.'!?&-]{20,})$", re.MULTILINE)
 
+# Standalone URLs — replace with SEP_MARKER as they often delimit ads/sections
+_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
+
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -155,6 +158,11 @@ def _strip_signature(text: str) -> str:
     return "\n".join(lines[:cutoff])
 
 
+def _replace_urls(text: str) -> str:
+    """Replace URLs with SEP_MARKER — they often delimit ads or sections."""
+    return _URL_RE.sub(SEP_MARKER, text)
+
+
 def _clean_segment(raw_bytes: bytes, charset: str) -> str:
     """Apply the full normalization pipeline to one text segment."""
     text = _bytes_to_str(raw_bytes, charset)
@@ -163,6 +171,7 @@ def _clean_segment(raw_bytes: bytes, charset: str) -> str:
     text = _strip_quotes(text)
     text = _strip_forwarding_headers(text)
     text = _replace_separators(text)
+    text = _replace_urls(text)
     text = _strip_signature(text)
     text = _normalize_whitespace(text)  # re-run after removal passes
     return text.strip()
