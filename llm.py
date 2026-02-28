@@ -139,7 +139,41 @@ class ExtractionResult:
         )
 
 
-def _estimate_ctx(system_prompt: str, user_message: str) -> int:
+_model_max_ctx_cache: int | None = None
+
+
+def _get_model_max_ctx(client: ollama.Client) -> int:
+    """
+    Query Ollama for the model's maximum context length, cached after first call.
+
+    Ollama's modelinfo dict uses architecture-prefixed keys for all llama.cpp-based
+    models (e.g. 'llama.context_length', 'qwen2.context_length', 'mistral.context_length').
+    Searching for any key ending in '.context_length' works across all model families.
+
+    Falls back to OLLAMA_MODEL_CTX from config if the query fails or the key
+    is not found (e.g. Ollama version mismatch or unusual model format).
+    """
+    global _model_max_ctx_cache
+    if _model_max_ctx_cache is not None:
+        return _model_max_ctx_cache
+    try:
+        info = client.show(OLLAMA_MODEL)
+        modelinfo = getattr(info, "modelinfo", {}) or {}
+        for key, value in modelinfo.items():
+            if key.endswith(".context_length"):
+                _model_max_ctx_cache = int(value)
+                _logger.debug("Discovered model max context: %d (key: %s)", _model_max_ctx_cache, key)
+                return _model_max_ctx_cache
+    except Exception as exc:
+        _logger.warning(
+            "Could not query model context length: %s — falling back to config value %d",
+            exc, OLLAMA_MODEL_CTX,
+        )
+    _model_max_ctx_cache = OLLAMA_MODEL_CTX
+    return _model_max_ctx_cache
+
+
+def _estimate_ctx(system_prompt: str, user_message: str, model_max_ctx: int) -> int:
     """
     Calculate num_ctx for this call, scaled to actual content size.
 
@@ -152,12 +186,12 @@ def _estimate_ctx(system_prompt: str, user_message: str) -> int:
     when the content technically fits, due to rope-scaling attention effects.
 
     Result is rounded up to the nearest 1024 and clamped to
-    [OLLAMA_CTX_MIN, OLLAMA_MODEL_CTX].
+    [OLLAMA_CTX_MIN, model_max_ctx].
     """
     input_tokens = (len(system_prompt) + len(user_message)) // 4
     needed = input_tokens * 3
     rounded = ((needed + 1023) // 1024) * 1024
-    return max(OLLAMA_CTX_MIN, min(rounded, OLLAMA_MODEL_CTX))
+    return max(OLLAMA_CTX_MIN, min(rounded, model_max_ctx))
 
 
 def _build_user_message(segments: list[str], subject: str) -> str:
@@ -195,6 +229,7 @@ def extract_joke(segments: list[str], subject: str) -> ExtractionResult:
     """
     client = ollama.Client(host=OLLAMA_HOST, timeout=OLLAMA_TIMEOUT)
     user_message = _build_user_message(segments, subject)
+    num_ctx = _estimate_ctx(_SYSTEM_PROMPT, user_message, _get_model_max_ctx(client))
 
     _logger.debug("LLM user prompt:\n%s", user_message)
 
@@ -205,7 +240,7 @@ def extract_joke(segments: list[str], subject: str) -> ExtractionResult:
             {"role": "user", "content": user_message},
         ],
         format=_EXTRACTION_SCHEMA,
-        options={"temperature": 0.1, "num_ctx": _estimate_ctx(_SYSTEM_PROMPT, user_message)},
+        options={"temperature": 0.1, "num_ctx": num_ctx},
         keep_alive=OLLAMA_KEEP_ALIVE,
     )
 
@@ -219,7 +254,7 @@ def extract_joke(segments: list[str], subject: str) -> ExtractionResult:
         prompt_tokens,
         output_tokens,
         (prompt_tokens / estimated_input) if prompt_tokens and estimated_input else 0,
-        _estimate_ctx(_SYSTEM_PROMPT, user_message),
+        num_ctx,
     )
 
     raw_content = response.message.content
