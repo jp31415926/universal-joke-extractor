@@ -14,6 +14,7 @@ from config import (
     MIN_BODY_LENGTH,
     OLLAMA_HOST,
     OLLAMA_MODEL,
+    OLLAMA_TIMEOUT,
     SEP_MARKER,
 )
 
@@ -146,7 +147,7 @@ def extract_joke(segments: list[str], subject: str) -> ExtractionResult:
         ollama.ResponseError: On Ollama API errors.
         ValueError: If the LLM response cannot be parsed.
     """
-    client = ollama.Client(host=OLLAMA_HOST)
+    client = ollama.Client(host=OLLAMA_HOST, timeout=OLLAMA_TIMEOUT)
     user_message = _build_user_message(segments, subject)
 
     _logger.debug("LLM user prompt:\n%s", user_message)
