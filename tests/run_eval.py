@@ -13,6 +13,7 @@ Usage:
     python tests/run_eval.py tests/fixtures/angels_explained  # single case
 """
 
+import html
 import json
 import logging
 import re
@@ -85,7 +86,8 @@ def _format_result_file(title: str, title_source: str, no_joke_found: bool, joke
 # ---------------------------------------------------------------------------
 
 def _normalize_body(text: str) -> str:
-    """Lowercase, strip punctuation, collapse whitespace → space-joined tokens."""
+    """Lowercase, decode HTML entities, strip punctuation, collapse whitespace → space-joined tokens."""
+    text = html.unescape(text)
     text = text.lower()
     text = re.sub(r"[^\w\s]", " ", text)
     tokens = text.split()

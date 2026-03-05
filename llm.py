@@ -77,14 +77,18 @@ LIST JOKES: If the joke is a list (numbered items, multiple one-liners sharing a
 
 ATTRIBUTED QUOTES: If the joke presents quotes from multiple people (e.g., children's quotes each followed by a name/age line like "Gregory, age 5" or "-Olive, age 9"), extract each quote AND its attribution line — they are part of the joke.
 
+ORIGINAL AUTHOR/SOURCE CREDITS: If the joke ends with a line crediting its original author or publication source (e.g., "-- Doug Graves", "Submitted to Reader's Digest by Sarah Brown, Greenville, NC."), include that line. It is part of the joke's identity, not a submission signature.
+
 ━━ WHAT TO OMIT ━━
 
 Strip these — they are NOT part of the joke:
 - Submitter notes addressed to the newsletter editors: e.g., "I thought you'd enjoy this", "Seeing that you used my last submission, here's another", "Feel free to edit."
-- Submitter initials, name sign-offs, or closing signatures at the end (e.g., "BCS", "- Barry", "-- John Smith").
+- Submitter sign-offs ONLY when accompanied by submitter commentary: e.g., "Hope you enjoy! -- Barry", "Great joke right? -BCS".
 - Forwarding boilerplate ("FW:", "check this out", "thought you'd enjoy this").
 
-Do NOT strip closing sentences that are part of the joke's own voice, even if they reference the joke itself.
+Do NOT strip:
+- Attribution lines crediting the original author or an external publication, such as "-- Doug Graves" at the end of a joke, or "Submitted to Reader's Digest by Sarah Brown, Greenville, NC." — these name the joke's source, not the GCFL submitter, and are part of the joke content.
+- Closing sentences that are part of the joke's own voice, even if they reference the joke itself.
 
 ━━ MULTI-SEGMENT EMAILS ━━
 
@@ -92,11 +96,17 @@ The email may contain multiple segments separated by "{SEP_MARKER}". The joke is
 
 ━━ TITLE SOURCE RULES ━━
 
-"body_internal" — A title or heading is LITERALLY present as a heading line in the joke text itself (e.g., "CONFUCIUS DID NOT SAY...", "To Women Everywhere From Men Who Have Had Enough!"). Copy it verbatim. Never use body_internal for a title you invented yourself.
+"body_internal" — A title or heading is LITERALLY present as a heading line in the joke text itself (e.g., "CONFUCIUS DID NOT SAY...", "To Women Everywhere From Men Who Have Had Enough!"). Copy it verbatim. Never use body_internal for a title you invented from the content.
 
-"subject" — No title heading appears in the joke body. Use the email Subject line as-is. Prefer this over generating a new title, even for informal subjects.
+"subject" — No title heading appears in the joke body, AND the subject is a meaningful, descriptive title. Use the email Subject line as-is. Do NOT use "subject" for generic submission-form subjects (see DISQUALIFIED SUBJECTS below).
 
-"generated" — Use only if the subject is completely irrelevant to the joke AND no title appears in the body. You are inventing the title yourself.
+"generated" — The subject is disqualified or irrelevant, and no literal heading appears in the body. Invent a short descriptive title yourself.
+
+DISQUALIFIED SUBJECTS — treat these as if there is no subject; never use them as title_source "subject":
+- Timestamp-style subjects: "2012-10-15 09:54:23 - Joke Submission"
+- Subjects ending in "Joke Submission" or "joke submission": "A True Story:  Joke Submission", "FW: Joke submission"
+- Subjects that are purely about the act of submitting rather than the joke itself: "A joke for submission", "Joke submission"
+When the subject is disqualified, look for a literal body heading (body_internal); if none, use generated.
 
 ━━ OTHER RULES ━━
 

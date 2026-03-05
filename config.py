@@ -1,4 +1,5 @@
-OLLAMA_MODEL = "llama3.1:8b"
+#OLLAMA_MODEL = "llama3.1:8b"
+OLLAMA_MODEL = "mistral-nemo:12b"
 OLLAMA_CTX_MIN = 4096    # minimum context window (covers short jokes + full schema)
 OLLAMA_MODEL_CTX = 32768  # maximum context window fallback if we fail to read the context window size from Ollama
 OLLAMA_HOST = "http://localhost:11434"
